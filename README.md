@@ -4,8 +4,9 @@ This is a [docker-registry backend driver](https://github.com/dotcloud/docker-re
 
 [![PyPI version][pypi-image]][pypi-url]
 [![Build Status][travis-image]][travis-url]
-[![Coverage Status]()]()
-![Downloads]()
+[![Coverage Status][coverage-image]][coverage-url]
+[![License][license-image]][pypi-url]
+
 ## Usage
 
 Assuming you have a working docker-registry
@@ -67,8 +68,11 @@ This will run the tests provided by [`docker-registry-core`](https://github.com/
 This is licensed under the Apache license.
 Most of the code here comes from docker-registry, under an Apache license as well.
 
-[pypi-url]:
-[pypi-image]:
+[pypi-url]: https://pypi.python.org/pypi/docker-registry-driver-ufile
+[pypi-image]: https://pypip.in/version/docker-registry-driver-ufile/badge.svg?style=flat
+[license-image]: https://pypip.in/license/docker-registry-driver-ufile/badge.svg?style=flat
 
-[travis-url]:
-[travis-image]:
+[travis-url]: https://travis-ci.org/SkyLothar/docker-registry-driver-ufile
+[travis-image]: https://travis-ci.org/SkyLothar/docker-registry-driver-ufile.svg
+[coverage-url]: https://coveralls.io/r/SkyLothar/docker-registry-driver-ufile
+[coverage-image]: https://coveralls.io/repos/SkyLothar/docker-registry-driver-ufile/badge.svg
