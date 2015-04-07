@@ -9,7 +9,7 @@ except ImportError:
     import distutils.core as setuptools
 
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __author__ = "SkyLothar"
 __email__ = "allothar@gmail.com"
 
@@ -49,8 +49,6 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: Implementation :: CPython",
         "Operating System :: OS Independent",
         "Topic :: Utilities",
