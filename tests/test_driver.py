@@ -35,3 +35,19 @@ class TestDriver(testing.Driver):
 
         iterator = self._storage.list_directory(path)
         next(iterator)
+
+    # extra testing for better coverage
+    def test_rm_tree(self):
+        self._storage.put_content("/foo/bar/baz", "d")
+        self._storage.put_content("/foo/quz", "d")
+        self._storage.remove("foo/")
+
+        tools.eq_(self._storage.exists("foo/bar/bar"), False)
+        tools.eq_(self._storage.exists("foo/quz"), False)
+
+    def test_exists_dir(self):
+        self._storage.put_content("/foo/baz", "d")
+        tools.eq_(self._storage.exists("foo/"), True)
+
+        self._storage.remove("foo/")
+        tools.eq_(self._storage.exists("foo/"), False)

@@ -265,6 +265,7 @@ class Storage(driver.Base):
 
         :param dir_path: dir path to remove
         """
+        dir_path = remove_slash(dir_path)
         # remove all file in the index
         logger.info("remove dir {0}".format(dir_path))
         for key in self._lsdir(dir_path):

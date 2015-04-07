@@ -9,7 +9,7 @@ install:
     - pip install -rtests/requirements.txt
     - pip install nose
 
-script: nosetests --with-coverage
+script: python setup.py nosetests --with-coverage --cover-package=docker_registry.drivers.ufile
 
 after_success:
     - pip install coveralls
