@@ -27,15 +27,6 @@ class TestDriver(testing.Driver):
         super(TestDriver, self).setUp()
         self._storage._session = MockSession()
 
-    @tools.raises(de.FileNotFoundError, StopIteration)
-    def test_empty_list_directory(self):
-        path = self.gen_random_string()
-        content = self.gen_random_string().encode('utf8')
-        self._storage.put_content(path, content)
-
-        iterator = self._storage.list_directory(path)
-        next(iterator)
-
     # extra testing for better coverage
     def test_rm_tree(self):
         self._storage.put_content("/foo/bar/baz", "d")
