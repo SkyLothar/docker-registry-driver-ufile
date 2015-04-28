@@ -90,7 +90,7 @@ class Storage(driver.Base):
     def exists(self, path):
         """check if key exists
 
-        :param key: key path
+        :param path: key path
         """
         logger.info("check for <{0}>".format(path))
         dirname, basename = os.path.split(path)
@@ -108,34 +108,49 @@ class Storage(driver.Base):
                 return False
 
         # key is file
-        # look for it in the index file
+        # download the index file first
         try:
             res = self._request(GET, dirname)
         except de.FileNotFoundError:
             logger.error("index not found: <{0}>".format(dirname))
             return False
 
+        # encode key name to bytes, so we can compare with response directly
         s_basename = basename.encode("utf8")
         for line in res.iter_lines():
+            # looking for key in index file
             if line == s_basename:
                 return True
         logger.debug("<{0}> not found".format(basename))
         return False
 
     def get_size(self, path):
-        # FIXME: ucloud bug, head will not return correct content-length
-        # res = self._request(HEAD, path)
-        res = self._request(GET, path)
+        """check filesize
+        return key's filesize in bytes
+
+        :param path: key path
+        """
+        res = self._request(HEAD, path)
         return int(res.headers["content-length"])
 
     @lru.get
     def get_content(self, path):
+        """get content directly
+
+        :param path: key path
+        """
         res = self._request(GET, path)
         return res.content
 
     @lru.set
     @add_to_index
     def put_content(self, path, content):
+        """save content to ufile
+        use `add_to_index` decorator to add path to its dir index
+
+        :param path: key path
+        :param content: content of key
+        """
         key = remove_slash(path)
         logger.info("simple upload <{0}>".format(key))
         self._request(PUT, key, data=content)
@@ -143,7 +158,10 @@ class Storage(driver.Base):
 
     @lru.remove
     def remove(self, path):
-        # we put final delete in the public function, so we only do it once
+        """remove anything, dir or file
+
+        :param path: key/dir path
+        """
         if self._is_dir(path):
             self._rmtree(path)
             # delete dir in parent-dir index
@@ -155,6 +173,11 @@ class Storage(driver.Base):
             self._update_index(index, deletes=[to_delete])
 
     def stream_read(self, path, bytes_range=None):
+        """streaming content for output, support bytes-range
+
+        :param path: key path
+        :param bytes_range: bytes range tuple (beg, end)
+        """
         headers = dict()
         if bytes_range:
             header_range = "bytes={0}-{1}".format(*bytes_range)
@@ -196,6 +219,11 @@ class Storage(driver.Base):
             yield remove_slash(fname)
 
     def _lsdir(self, path):
+        """list all content in the target dir
+        returns a list of filenames
+
+        :param path: dir path
+        """
         dir_path = remove_slash(path or "")
         logger.info("list dir for {0}".format(dir_path))
         res = self._request(GET, dir_path)
@@ -253,6 +281,7 @@ class Storage(driver.Base):
             res.raise_for_status()
 
     def _is_dir(self, path):
+        """check if dir is a valid path(endswith('/'))"""
         is_dir = path.endswith("/")
         logger.info("test dir <{0}> {1}".format(path, is_dir))
         return is_dir
@@ -367,7 +396,7 @@ class Storage(driver.Base):
 
         :param key: upload file path
         :param upload_id: multipart upload_id
-        :params etags: parts etags joined with ","
+        :param etags: parts etags joined with ","
         """
         logger.info(
             "finsish multipart upload for <{0})>, upload_id={1}".format(
@@ -377,6 +406,12 @@ class Storage(driver.Base):
         self._request(POST, key, params=dict(uploadId=upload_id), data=etags)
 
     def _update_index(self, index, adds=None, deletes=None):
+        """add/delete filename form index
+
+        :param index: index path
+        :param adds: list containing filenames to add to index
+        :param deletes: list containing filenames to delete form index
+        """
         if index == "":
             index = self.root_index
         logger.info(
