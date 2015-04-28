@@ -20,9 +20,6 @@ from docker_registry.core import exceptions as de
 from docker_registry.core import lru
 from ucloudauth import UFileAuth
 
-# FIXME: tmp hack for ucloud minit bug
-import mock
-
 logger = logging.getLogger(__name__)
 
 
@@ -312,16 +309,12 @@ class Storage(driver.Base):
             )
             return self._mkdir(parent)
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _init_multipart_upload(self, key, mock_time):
+    def _init_multipart_upload(self, key):
         """initiative a multipart upload
         returns a tuple (upload_id, block_size)
 
         :param key: upload file path
         """
-        mock_time.return_value = ""
-
         logger.info("init multipart upload for <{0}>".format(key))
         res = self._request(POST, "{0}?uploads".format(key))
         upload_id, block_size = res.json()["UploadId"], res.json()["BlkSize"]
@@ -332,9 +325,7 @@ class Storage(driver.Base):
         )
         return upload_id, block_size
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _multipart_upload(self, key, upload_id, part_number, data, mock_t):
+    def _multipart_upload(self, key, upload_id, part_number, data):
         """multipart upload, upload part of file
 
         :param key: upload file path
@@ -342,8 +333,6 @@ class Storage(driver.Base):
         :param part_number: part number of the whole file, 0 based
         :param data: part of file to upload
         """
-        mock_t.return_value = ""
-
         logger.info(
             "multipart upload part {0} for <{1})>, upload_id={2}".format(
                 part_number, key, upload_id
@@ -360,16 +349,12 @@ class Storage(driver.Base):
         )
         return etag
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _abort_multipart_upload(self, key, upload_id, mock_t):
+    def _abort_multipart_upload(self, key, upload_id):
         """abort multipart upload procedure
 
         :param key: upload file path
         :param upload_id: multipart upload_id
         """
-        mock_t.return_value = ""
-
         logger.info(
             "abort multipart upload for <{0})>, upload_id={1}".format(
                 key, upload_id,
@@ -377,17 +362,13 @@ class Storage(driver.Base):
         )
         self._request(DELETE, key, params=dict(uploadId=upload_id))
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _finish_multipart_upload(self, key, upload_id, etags, mock_t):
+    def _finish_multipart_upload(self, key, upload_id, etags):
         """finish multipart upload
 
         :param key: upload file path
         :param upload_id: multipart upload_id
         :params etags: parts etags joined with ","
         """
-        mock_t.return_value = ""
-
         logger.info(
             "finsish multipart upload for <{0})>, upload_id={1}".format(
                 key, upload_id,
