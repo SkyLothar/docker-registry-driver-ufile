@@ -1,6 +1,7 @@
 # Docker registry ufile driver
 
-This is a [docker-registry backend driver](https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core) based on the [UFile](http://www.ucloud.cn/product/ufile_main/) key-value storage.
+这是基于[UFile](http://www.ucloud.cn/product/ufile_main/)的[docker-registry backend driver](https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core)的存储适配.
+
 
 [![License][license-image]][license-url]
 [![PyPI version][pypi-image]][pypi-url]
