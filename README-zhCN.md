@@ -22,13 +22,17 @@
 - python2, 以ubuntu自带的python2为例 (docker-registry因为使用了gevent, 目前仅支持py2)
 
 ### 安装
+#### 依赖
+```bash
+sudo apt-get install -y python-dev liblzma-dev libssl-dev swig
+```
 #### virtualenv
 virtualenv将不同的python环境隔离. 你可以在[这里](virtualenv-site)了解更多
 ```bash
-sudo apt-get install python-virtualenv
+sudo apt-get install -y python-virtualenv
 virtualenv docker-registry
 cd docker-registry
-source ./bin/active
+source bin/activate
 ```
 #### 安装docker-registry及ufile-driver
 ```
@@ -36,9 +40,79 @@ pip install docker-registry
 pip install docker-registry-driver-ufile
 ```
 #### 配置和运行
-修改下方配置并存为`conf.yml`
+修改下方配置`ufile`中的内容并存为`conf.yml`
 > 具体配置请看[详细配置](#详细配置). **如果可能, 请使用内网url**
+
 ```yaml
+common: &common
+    issue: '"docker-registry server"'
+    # Default log level is info
+    loglevel: _env:LOGLEVEL:info
+    # Enable debugging (additional informations in the output of the _ping endpoint)
+    debug: _env:DEBUG:false
+    # By default, the registry acts standalone (eg: doesn't query the index)
+    standalone: _env:STANDALONE:true
+    # The default endpoint to use (if NOT standalone) is index.docker.io
+    index_endpoint: _env:INDEX_ENDPOINT:https://index.docker.io
+    # Storage redirect is disabled
+    storage_redirect: _env:STORAGE_REDIRECT
+    # Token auth is enabled (if NOT standalone)
+    disable_token_auth: _env:DISABLE_TOKEN_AUTH
+    # No priv key
+    privileged_key: _env:PRIVILEGED_KEY
+    # No search backend
+    search_backend: _env:SEARCH_BACKEND
+    # SQLite search backend
+    sqlalchemy_index_database: _env:SQLALCHEMY_INDEX_DATABASE:sqlite:////tmp/docker-registry.db
+
+    # Mirroring is not enabled
+    mirroring:
+        source: _env:MIRROR_SOURCE # https://registry-1.docker.io
+        source_index: _env:MIRROR_SOURCE_INDEX # https://index.docker.io
+        tags_cache_ttl: _env:MIRROR_TAGS_CACHE_TTL:172800 # seconds
+
+    cache:
+        host: _env:CACHE_REDIS_HOST
+        port: _env:CACHE_REDIS_PORT
+        db: _env:CACHE_REDIS_DB:0
+        password: _env:CACHE_REDIS_PASSWORD
+
+    # Enabling LRU cache for small files
+    # This speeds up read/write on small files
+    # when using a remote storage backend (like S3).
+    cache_lru:
+        host: _env:CACHE_LRU_REDIS_HOST
+        port: _env:CACHE_LRU_REDIS_PORT
+        db: _env:CACHE_LRU_REDIS_DB:0
+        password: _env:CACHE_LRU_REDIS_PASSWORD
+
+    # Enabling these options makes the Registry send an email on each code Exception
+    email_exceptions:
+        smtp_host: _env:SMTP_HOST
+        smtp_port: _env:SMTP_PORT:25
+        smtp_login: _env:SMTP_LOGIN
+        smtp_password: _env:SMTP_PASSWORD
+        smtp_secure: _env:SMTP_SECURE:false
+        from_addr: _env:SMTP_FROM_ADDR:docker-registry@localdomain.local
+        to_addr: _env:SMTP_TO_ADDR:noise+dockerregistry@localdomain.local
+
+    # Enable bugsnag (set the API key)
+    bugsnag: _env:BUGSNAG
+
+    # CORS support is not enabled by default
+    cors:
+        origins: _env:CORS_ORIGINS
+        methods: _env:CORS_METHODS
+        headers: _env:CORS_HEADERS:[Content-Type]
+        expose_headers: _env:CORS_EXPOSE_HEADERS
+        supports_credentials: _env:CORS_SUPPORTS_CREDENTIALS
+        max_age: _env:CORS_MAX_AGE
+        send_wildcard: _env:CORS_SEND_WILDCARD
+        always_send: _env:CORS_ALWAYS_SEND
+        automatic_options: _env:CORS_AUTOMATIC_OPTIONS
+        vary_header: _env:CORS_VARY_HEADER
+        resources: _env:CORS_RESOURCES
+
 ufile:
       <<: *common
       storage: ufile
