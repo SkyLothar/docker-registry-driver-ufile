@@ -20,9 +20,6 @@ from docker_registry.core import exceptions as de
 from docker_registry.core import lru
 from ucloudauth import UFileAuth
 
-# FIXME: tmp hack for ucloud minit bug
-import mock
-
 logger = logging.getLogger(__name__)
 
 
@@ -93,7 +90,7 @@ class Storage(driver.Base):
     def exists(self, path):
         """check if key exists
 
-        :param key: key path
+        :param path: key path
         """
         logger.info("check for <{0}>".format(path))
         dirname, basename = os.path.split(path)
@@ -111,34 +108,49 @@ class Storage(driver.Base):
                 return False
 
         # key is file
-        # look for it in the index file
+        # download the index file first
         try:
             res = self._request(GET, dirname)
         except de.FileNotFoundError:
             logger.error("index not found: <{0}>".format(dirname))
             return False
 
+        # encode key name to bytes, so we can compare with response directly
         s_basename = basename.encode("utf8")
         for line in res.iter_lines():
+            # looking for key in index file
             if line == s_basename:
                 return True
         logger.debug("<{0}> not found".format(basename))
         return False
 
     def get_size(self, path):
-        # FIXME: ucloud bug, head will not return correct content-length
-        # res = self._request(HEAD, path)
-        res = self._request(GET, path)
+        """check filesize
+        return key's filesize in bytes
+
+        :param path: key path
+        """
+        res = self._request(HEAD, path)
         return int(res.headers["content-length"])
 
     @lru.get
     def get_content(self, path):
+        """get content directly
+
+        :param path: key path
+        """
         res = self._request(GET, path)
         return res.content
 
     @lru.set
     @add_to_index
     def put_content(self, path, content):
+        """save content to ufile
+        use `add_to_index` decorator to add path to its dir index
+
+        :param path: key path
+        :param content: content of key
+        """
         key = remove_slash(path)
         logger.info("simple upload <{0}>".format(key))
         self._request(PUT, key, data=content)
@@ -146,7 +158,10 @@ class Storage(driver.Base):
 
     @lru.remove
     def remove(self, path):
-        # we put final delete in the public function, so we only do it once
+        """remove anything, dir or file
+
+        :param path: key/dir path
+        """
         if self._is_dir(path):
             self._rmtree(path)
             # delete dir in parent-dir index
@@ -158,6 +173,11 @@ class Storage(driver.Base):
             self._update_index(index, deletes=[to_delete])
 
     def stream_read(self, path, bytes_range=None):
+        """streaming content for output, support bytes-range
+
+        :param path: key path
+        :param bytes_range: bytes range tuple (beg, end)
+        """
         headers = dict()
         if bytes_range:
             header_range = "bytes={0}-{1}".format(*bytes_range)
@@ -199,6 +219,11 @@ class Storage(driver.Base):
             yield remove_slash(fname)
 
     def _lsdir(self, path):
+        """list all content in the target dir
+        returns a list of filenames
+
+        :param path: dir path
+        """
         dir_path = remove_slash(path or "")
         logger.info("list dir for {0}".format(dir_path))
         res = self._request(GET, dir_path)
@@ -256,6 +281,7 @@ class Storage(driver.Base):
             res.raise_for_status()
 
     def _is_dir(self, path):
+        """check if dir is a valid path(endswith('/'))"""
         is_dir = path.endswith("/")
         logger.info("test dir <{0}> {1}".format(path, is_dir))
         return is_dir
@@ -312,16 +338,12 @@ class Storage(driver.Base):
             )
             return self._mkdir(parent)
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _init_multipart_upload(self, key, mock_time):
+    def _init_multipart_upload(self, key):
         """initiative a multipart upload
         returns a tuple (upload_id, block_size)
 
         :param key: upload file path
         """
-        mock_time.return_value = ""
-
         logger.info("init multipart upload for <{0}>".format(key))
         res = self._request(POST, "{0}?uploads".format(key))
         upload_id, block_size = res.json()["UploadId"], res.json()["BlkSize"]
@@ -332,9 +354,7 @@ class Storage(driver.Base):
         )
         return upload_id, block_size
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _multipart_upload(self, key, upload_id, part_number, data, mock_t):
+    def _multipart_upload(self, key, upload_id, part_number, data):
         """multipart upload, upload part of file
 
         :param key: upload file path
@@ -342,8 +362,6 @@ class Storage(driver.Base):
         :param part_number: part number of the whole file, 0 based
         :param data: part of file to upload
         """
-        mock_t.return_value = ""
-
         logger.info(
             "multipart upload part {0} for <{1})>, upload_id={2}".format(
                 part_number, key, upload_id
@@ -360,16 +378,12 @@ class Storage(driver.Base):
         )
         return etag
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _abort_multipart_upload(self, key, upload_id, mock_t):
+    def _abort_multipart_upload(self, key, upload_id):
         """abort multipart upload procedure
 
         :param key: upload file path
         :param upload_id: multipart upload_id
         """
-        mock_t.return_value = ""
-
         logger.info(
             "abort multipart upload for <{0})>, upload_id={1}".format(
                 key, upload_id,
@@ -377,17 +391,13 @@ class Storage(driver.Base):
         )
         self._request(DELETE, key, params=dict(uploadId=upload_id))
 
-    # FIXME: date in string_to_sign must be "", ucloud bug
-    @mock.patch("time.strftime")
-    def _finish_multipart_upload(self, key, upload_id, etags, mock_t):
+    def _finish_multipart_upload(self, key, upload_id, etags):
         """finish multipart upload
 
         :param key: upload file path
         :param upload_id: multipart upload_id
-        :params etags: parts etags joined with ","
+        :param etags: parts etags joined with ","
         """
-        mock_t.return_value = ""
-
         logger.info(
             "finsish multipart upload for <{0})>, upload_id={1}".format(
                 key, upload_id,
@@ -396,6 +406,12 @@ class Storage(driver.Base):
         self._request(POST, key, params=dict(uploadId=upload_id), data=etags)
 
     def _update_index(self, index, adds=None, deletes=None):
+        """add/delete filename form index
+
+        :param index: index path
+        :param adds: list containing filenames to add to index
+        :param deletes: list containing filenames to delete form index
+        """
         if index == "":
             index = self.root_index
         logger.info(

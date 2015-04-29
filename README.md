@@ -2,10 +2,13 @@
 
 This is a [docker-registry backend driver](https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core) based on the [UFile](http://www.ucloud.cn/product/ufile_main/) key-value storage.
 
+[![License][license-image]][license-url]
 [![PyPI version][pypi-image]][pypi-url]
+
 [![Build Status][travis-image]][travis-url]
 [![Coverage Status][coverage-image]][coverage-url]
-[![License][license-image]][pypi-url]
+
+[中文文档](https://gitcafe.com/SkyLothar/docker-registry-driver-ufile/blob/master/README-zhCN.md)
 
 ## Usage
 
@@ -69,10 +72,10 @@ This is licensed under the Apache license.
 Most of the code here comes from docker-registry, under an Apache license as well.
 
 [pypi-url]: https://pypi.python.org/pypi/docker-registry-driver-ufile
-[pypi-image]: https://pypip.in/version/docker-registry-driver-ufile/badge.svg?style=flat
-[license-image]: https://pypip.in/license/docker-registry-driver-ufile/badge.svg?style=flat
-
+[pypi-image]:  https://img.shields.io/pypi/v/docker-registry-driver-ufile.svg?style=flat-square
 [travis-url]: https://travis-ci.org/SkyLothar/docker-registry-driver-ufile
-[travis-image]: https://travis-ci.org/SkyLothar/docker-registry-driver-ufile.svg
+[travis-image]:https://img.shields.io/travis/SkyLothar/docker-registry-driver-ufile.svg?style=flat-square
 [coverage-url]: https://coveralls.io/r/SkyLothar/docker-registry-driver-ufile
-[coverage-image]: https://coveralls.io/repos/SkyLothar/docker-registry-driver-ufile/badge.svg
+[coverage-image]: https://img.shields.io/coveralls/SkyLothar/docker-registry-driver-ufile.svg?style=flat-square
+[license-url]: http://www.apache.org/licenses/LICENSE-2.0.html
+[license-image]: https://img.shields.io/github/license/skylothar/docker-registry-driver-ufile.svg?style=flat-square
