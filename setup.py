@@ -9,7 +9,7 @@ except ImportError:
     import distutils.core as setuptools
 
 
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 __author__ = "SkyLothar"
 __email__ = "allothar@gmail.com"
 
