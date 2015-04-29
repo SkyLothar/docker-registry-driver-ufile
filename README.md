@@ -8,7 +8,7 @@ This is a [docker-registry backend driver](https://github.com/dotcloud/docker-re
 [![Build Status][travis-image]][travis-url]
 [![Coverage Status][coverage-image]][coverage-url]
 
-[中文文档](https://gitcafe.com/SkyLothar/docker-registry-driver-ufile/blob/master/README-zhCN.md)
+[中文文档](README-zhCN.md)
 
 ## Usage
 
