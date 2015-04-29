@@ -1,6 +1,6 @@
 # Docker registry ufile driver
 
-这是基于[UFile](http://www.ucloud.cn/product/ufile_main/)的[docker-registry backend driver](https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core)的存储适配.
+这是基于[UFile](http://www.ucloud.cn/product/ufile_main/)的[docker-registry](https://github.com/dotcloud/docker-registry/tree/master/depends/docker-registry-core)的存储适配.
 
 
 [![License][license-image]][license-url]
@@ -50,15 +50,16 @@ ufile:
       ufile_timeout: 60
 ```
 
-4. 运行docker-registry并指定运行环境和配置文件
+#### 运行docker-registry并指定运行环境和配置文件
 ```bash
 export DOCKER_REGISTRY_CONFIG=`pwd`/config.yml
-export SETTINGS_FLAVOR dev
+export SETTINGS_FLAVOR=ufile
 
 docker-registry
 ```
 
-5. 试着玩一下
+#### 试着玩一下
+
 > 默认的docker-registry监听localhost:5000
 > 你只需要把某个image tag 成 localhost:5000/image-name:tag-name
 > 然后push localhost:5000/image-name:tag-name 即可
